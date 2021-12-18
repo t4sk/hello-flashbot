@@ -1,0 +1,29 @@
+{
+  "name": "hello-flashbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/t4sk/hello-flashbot.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/t4sk/hello-flashbot/issues"
+  },
+  "homepage": "https://github.com/t4sk/hello-flashbot#readme",
+  "dependencies": {
+    "@flashbots/ethers-provider-bundle": "^0.4.3",
+    "ethers": "^5.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.0",
+    "ts-node": "^10.4.0",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.4"
+  }
+}
