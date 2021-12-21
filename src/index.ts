@@ -1,5 +1,8 @@
 import { providers, Wallet } from "ethers";
-import { FlashbotsBundleProvider } from "@flashbots/ethers-provider-bundle";
+import {
+  FlashbotsBundleProvider,
+  FlashbotsBundleResolution,
+} from "@flashbots/ethers-provider-bundle";
 
 const GWEI = 10n ** 9n;
 const ETHER = 10n ** 18n;
@@ -33,7 +36,7 @@ async function main() {
         signer: wallet,
         transaction: {
           chainId: CHAIN_ID,
-          // TODO: what is type?
+          // EIP 1559 transaction
           type: 2,
           value: 0,
           data: "0x",
@@ -45,17 +48,36 @@ async function main() {
       },
     ]);
 
-    const sim = await flashbot.simulate(signedTx, block + 1);
+    const targetBlock = block + 1;
+    const sim = await flashbot.simulate(signedTx, targetBlock);
 
     if ("error" in sim) {
       console.log(`simulation error: ${sim.error.message}`);
     } else {
-      console.log(`simulation success: ${JSON.stringify(sim, null, 2)}`);
+      // console.log(`simulation success: ${JSON.stringify(sim, null, 2)}`);
+      console.log(`simulation success`);
     }
 
-    // TODO: how to stop on success?
-    const res = await flashbot.sendRawBundle(signedTx, block + 1);
-    console.log("RES", res);
+    const res = await flashbot.sendRawBundle(signedTx, targetBlock);
+    if ("error" in res) {
+      throw new Error(res.error.message);
+    }
+
+    const bundleResolution = await res.wait();
+    if (bundleResolution === FlashbotsBundleResolution.BundleIncluded) {
+      console.log(`Congrats, included in ${targetBlock}`);
+      console.log(JSON.stringify(sim, null, 2));
+      process.exit(0);
+    } else if (
+      bundleResolution === FlashbotsBundleResolution.BlockPassedWithoutInclusion
+    ) {
+      console.log(`Not included in ${targetBlock}`);
+    } else if (
+      bundleResolution === FlashbotsBundleResolution.AccountNonceTooHigh
+    ) {
+      console.log("Nonce too high, bailing");
+      process.exit(1);
+    }
   });
 }
 
